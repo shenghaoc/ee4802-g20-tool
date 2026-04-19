@@ -1,0 +1,116 @@
+# ee4802-g20-tool
+
+Cloudflare Worker API for HDB resale price prediction.
+
+## Requirements
+
+- Node.js `>=20.3.0`
+- npm `>=10`
+- Cloudflare account with D1 enabled
+
+## Setup
+
+1. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+2. Create a D1 database (if you do not already have one):
+
+   ```bash
+   npx wrangler d1 create ee4802-g20-tool-db
+   ```
+
+3. This repo uses a tracked [`wrangler.toml`](wrangler.toml) for the Worker metadata, observability, and remote D1 binding shape. It intentionally does not include a `preview_database_id`.
+
+4. Initialize schema/data against your remote D1 database:
+
+   ```bash
+   npx wrangler d1 execute ee4802-g20-tool-db --local --file=data/db.sql
+   npx wrangler d1 execute ee4802-g20-tool-db --remote --file=data/db.sql
+   ```
+
+## Commands
+
+- Remote dev: `npm run dev`
+- Deploy: `npm run deploy`
+- Type check: `npm run typecheck`
+- Tests: `npm test`
+
+## D1 Binding
+
+- This project includes a `wrangler.toml` with the expected `DB` binding.
+- The Worker is configured for a fully remote D1 workflow and does not use `preview_database_id`.
+
+## API
+
+### `POST /api/prices`
+
+Accepts `multipart/form-data`.
+
+Required fields:
+
+- `model`: `Support Vector Regression` | `Ridge Regression`
+- `town`: one of the supported town names in [`src/lists.ts`](src/lists.ts)
+- `storeyRange`: one of the supported ranges in [`src/lists.ts`](src/lists.ts)
+- `flatModel`: one of the supported flat models in [`src/lists.ts`](src/lists.ts)
+- `floorAreaSqm`: finite number, `> 0`
+- `leaseCommenceYear`: integer, `>= 1960`
+- `monthStart`: one of `2017-01` ... `2022-02`
+- `monthEnd`: one of `2017-01` ... `2022-02`, and must be `>= monthStart`
+
+Example request:
+
+```bash
+curl -X POST http://127.0.0.1:8787/api/prices \
+  -F "model=Support Vector Regression" \
+  -F "town=ANG MO KIO" \
+  -F "storeyRange=10 TO 12" \
+  -F "flatModel=Model A" \
+  -F "floorAreaSqm=92.5" \
+  -F "leaseCommenceYear=2003" \
+  -F "monthStart=2020-01" \
+  -F "monthEnd=2020-03"
+```
+
+Success response:
+
+```json
+{
+  "predictions": [
+    { "month": "2020-01", "predictedPrice": 517345.19 },
+    { "month": "2020-02", "predictedPrice": 518227.78 },
+    { "month": "2020-03", "predictedPrice": 519110.36 }
+  ]
+}
+```
+
+Validation error response (`400`):
+
+```json
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Invalid request payload",
+    "issues": [
+      {
+        "code": "custom",
+        "path": "monthEnd",
+        "message": "Must be the same as or after monthStart"
+      }
+    ]
+  }
+}
+```
+
+Internal error response (`500`):
+
+```json
+{
+  "error": {
+    "code": "INTERNAL_ERROR",
+    "message": "An unexpected internal error occurred."
+  }
+}
+```

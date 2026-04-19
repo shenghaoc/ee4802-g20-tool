@@ -1,0 +1,13 @@
+#:schema node_modules/wrangler/config-schema.json
+name = "ee4802-g20-tool"
+main = "src/index.ts"
+compatibility_date = "2026-04-19"
+
+[observability]
+enabled = true
+head_sampling_rate = 1
+
+[[d1_databases]]
+binding = "DB"
+database_name = "ee4802-g20-tool-db"
+remote = true

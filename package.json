@@ -3,18 +3,22 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "deploy": "wrangler deploy",
-    "dev": "wrangler dev",
-    "start": "wrangler dev"
+    "dev": "wrangler dev --remote",
+    "start": "wrangler dev --remote"
   },
   "dependencies": {
-    "@hono/zod-validator": "^0.1.11",
-    "hono": "^3.12.1",
-    "zod": "^3.22.4"
+    "@hono/zod-validator": "^0.7.6",
+    "hono": "^4.12.14",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20231218.0",
-    "typescript": "^5.3.3",
-    "wrangler": "^3.22.3"
+    "@cloudflare/workers-types": "^4.20260418.1",
+    "typescript": "^6.0.3",
+    "vitest": "^3.2.4",
+    "wrangler": "^4.83.0"
   }
 }
