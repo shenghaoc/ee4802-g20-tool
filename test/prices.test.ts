@@ -9,6 +9,8 @@ import {
   town_list
 } from '../src/lists';
 
+const currentYear = new Date().getUTCFullYear();
+
 type PriceFormData = {
   model: string;
   town: string;
@@ -339,6 +341,38 @@ describe('POST /api/prices validation', () => {
     });
 
     expect(response.status).toBe(200);
+  });
+
+  it('rejects future leaseCommenceYear values', async () => {
+    const db = new MockD1Database();
+    const { response } = await postPrices(
+      { leaseCommenceYear: String(currentYear + 1) },
+      { db }
+    );
+    const body = (await response.json()) as ValidationErrorResponse;
+
+    expect(response.status).toBe(400);
+    expect(body.error.code).toBe('VALIDATION_ERROR');
+    expect(body.error.issues?.some((issue) => issue.path === 'leaseCommenceYear')).toBe(true);
+    expect(db.prepareCalls).toBe(0);
+  });
+
+  it('rejects leaseCommenceYear after the prediction period starts', async () => {
+    const db = new MockD1Database();
+    const { response } = await postPrices(
+      {
+        leaseCommenceYear: '2020',
+        monthStart: '2019-01',
+        monthEnd: '2019-03'
+      },
+      { db }
+    );
+    const body = (await response.json()) as ValidationErrorResponse;
+
+    expect(response.status).toBe(400);
+    expect(body.error.code).toBe('VALIDATION_ERROR');
+    expect(body.error.issues?.some((issue) => issue.path === 'leaseCommenceYear')).toBe(true);
+    expect(db.prepareCalls).toBe(0);
   });
 
   it('rejects non-positive floorAreaSqm', async () => {

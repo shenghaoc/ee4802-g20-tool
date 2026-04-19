@@ -34,6 +34,7 @@ const monthIndexMap = month_list.reduce<Record<Month, number>>((accumulator, mon
   accumulator[month] = index;
   return accumulator;
 }, {} as Record<Month, number>);
+const currentYear = new Date().getUTCFullYear();
 
 const pricesFormSchema = z
   .object({
@@ -53,12 +54,28 @@ const pricesFormSchema = z
     monthEnd: z.enum(month_list)
   })
   .strict()
-  .superRefine(({ monthStart, monthEnd }, context) => {
+  .superRefine(({ leaseCommenceYear, monthStart, monthEnd }, context) => {
     if (monthIndexMap[monthStart] > monthIndexMap[monthEnd]) {
       context.addIssue({
         code: 'custom',
         path: ['monthEnd'],
         message: 'Must be the same as or after monthStart'
+      });
+    }
+
+    if (leaseCommenceYear > currentYear) {
+      context.addIssue({
+        code: 'custom',
+        path: ['leaseCommenceYear'],
+        message: `Must not be after ${currentYear}`
+      });
+    }
+
+    if (leaseCommenceYear > Number.parseInt(monthStart.slice(0, 4), 10)) {
+      context.addIssue({
+        code: 'custom',
+        path: ['leaseCommenceYear'],
+        message: 'Must not be after the requested prediction period starts'
       });
     }
   });
