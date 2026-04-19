@@ -5,12 +5,12 @@
     "moduleResolution": "Bundler",
     "strict": true,
     "noEmit": true,
-    "types": ["@cloudflare/workers-types", "vitest/globals"],
+    "types": ["vitest/globals"],
     "lib": ["ES2022"],
     "isolatedModules": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src", "test", "vitest.config.ts"]
+  "include": ["src", "test", "vitest.config.ts", "worker-configuration.d.ts"]
 }

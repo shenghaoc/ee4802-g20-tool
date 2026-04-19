@@ -173,7 +173,7 @@ async function postPrices(
         return undefined;
       },
       props: {}
-    } as ExecutionContext
+    } as unknown as ExecutionContext
   );
 
   return {

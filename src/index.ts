@@ -11,12 +11,8 @@ import {
   town_list
 } from './lists';
 
-type Bindings = {
-  DB: D1Database;
-};
-
 type AppEnv = {
-  Bindings: Bindings;
+  Bindings: Env;
 };
 
 type Month = (typeof month_list)[number];
