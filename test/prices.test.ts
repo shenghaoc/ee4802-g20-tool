@@ -9,7 +9,7 @@ import {
   town_list
 } from '../src/lists';
 
-const currentYear = new Date().getUTCFullYear();
+const datasetEndYear = Number.parseInt(month_list[month_list.length - 1].slice(0, 4), 10);
 
 type PriceFormData = {
   model: string;
@@ -343,10 +343,10 @@ describe('POST /api/prices validation', () => {
     expect(response.status).toBe(200);
   });
 
-  it('rejects future leaseCommenceYear values', async () => {
+  it('rejects leaseCommenceYear values after the dataset end year', async () => {
     const db = new MockD1Database();
     const { response } = await postPrices(
-      { leaseCommenceYear: String(currentYear + 1) },
+      { leaseCommenceYear: String(datasetEndYear + 1) },
       { db }
     );
     const body = (await response.json()) as ValidationErrorResponse;
@@ -357,7 +357,7 @@ describe('POST /api/prices validation', () => {
     expect(db.prepareCalls).toBe(0);
   });
 
-  it('rejects leaseCommenceYear after the prediction period starts', async () => {
+  it('rejects leaseCommenceYear after the prediction period ends', async () => {
     const db = new MockD1Database();
     const { response } = await postPrices(
       {

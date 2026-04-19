@@ -34,7 +34,7 @@ const monthIndexMap = month_list.reduce<Record<Month, number>>((accumulator, mon
   accumulator[month] = index;
   return accumulator;
 }, {} as Record<Month, number>);
-const currentYear = new Date().getUTCFullYear();
+const datasetEndYear = Number.parseInt(month_list[month_list.length - 1].slice(0, 4), 10);
 
 const pricesFormSchema = z
   .object({
@@ -63,19 +63,19 @@ const pricesFormSchema = z
       });
     }
 
-    if (leaseCommenceYear > currentYear) {
+    if (leaseCommenceYear > datasetEndYear) {
       context.addIssue({
         code: 'custom',
         path: ['leaseCommenceYear'],
-        message: `Must not be after ${currentYear}`
+        message: `Must not be after ${datasetEndYear}`
       });
     }
 
-    if (leaseCommenceYear > Number.parseInt(monthStart.slice(0, 4), 10)) {
+    if (leaseCommenceYear > Number.parseInt(monthEnd.slice(0, 4), 10)) {
       context.addIssue({
         code: 'custom',
         path: ['leaseCommenceYear'],
-        message: 'Must not be after the requested prediction period starts'
+        message: 'Must not be after the requested prediction period ends'
       });
     }
   });
